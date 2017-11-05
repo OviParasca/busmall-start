@@ -30,58 +30,81 @@ function createImageObjects() {
 }
 createImageObjects();
 
+
+// var testObject = {name:"test", time:"Date 2017-02-03T08:38:04.449Z"};
+// localStorage.setItem('testObject', JSON.stringify(testObject));
+// var retrievedObject = localStorage.getItem('testObject');
+// console.log('retrievedObject: ', JSON.parse(retrievedObject));
+
+console.log(Image.allImages);
+// localStorage.removeItem('Images');
+localStorage.setItem('Images', JSON.stringify(Image));
+// localStorage["Images"] = JSON.stringify(Image);
+// var storeImageObjs = JSON.parse(localStorage.getItem('Images'));
+var retrievedObject = localStorage.getItem('Images');
+console.log('testing ' + JSON.parse(retrievedObject));
+
+
+
 // add all the event listeners
 var container = document.getElementById('container');
 container.addEventListener('click', handleClick);
   
-showImages();
+// showImages();
 
 
 function showImages() {
     var currentlyShowing = [];
+    var storedImages = JSON.parse(localStorage["Images"]);
+    
     // make left image unique
     currentlyShowing[0] = getRandomIndex();
-    while (Image.justViewed.indexOf(currentlyShowing[0]) !== -1) {
+    while (storedImages.justViewed.indexOf(currentlyShowing[0]) !== -1) {
         currentlyShowing[0] = getRandomIndex();
     }
 
     currentlyShowing[1] = getRandomIndex();
-    while (currentlyShowing[0] === currentlyShowing[1] || Image.justViewed.indexOf(currentlyShowing[1]) !== -1) {
+    while (currentlyShowing[0] === currentlyShowing[1] 
+        || storedImages.justViewed.indexOf(currentlyShowing[1]) !== -1) {
         currentlyShowing[1] = getRandomIndex();
     }
 
     currentlyShowing[2] = getRandomIndex();
-    while (currentlyShowing[0] === currentlyShowing[2] || currentlyShowing[1] === currentlyShowing[2] || Image.justViewed.indexOf(currentlyShowing[2]) !== -1) {
+    while (currentlyShowing[0] === currentlyShowing[2] 
+        || currentlyShowing[1] === currentlyShowing[2] 
+        || storedImages.justViewed.indexOf(currentlyShowing[2]) !== -1) {
         currentlyShowing[2] = getRandomIndex();
     }
 
-    for (var i = 0; i < Image.pics.length; i++) {
-        Image.pics[i].src = Image.allImages[currentlyShowing[i]].filepath;
-        Image.pics[i].id = Image.allImages[currentlyShowing[i]].name;
-        Image.allImages[currentlyShowing[i]].views += 1;
-        Image.justViewed[i] = currentlyShowing[i];
+    for (var i = 0; i < storedImages.pics.length; i++) {
+        storedImages.pics[i].src = storedImages.allImages[currentlyShowing[i]].filepath;
+        storedImages.pics[i].id = storedImages.allImages[currentlyShowing[i]].name;
+        storedImages.allImages[currentlyShowing[i]].views += 1;
+        storedImages.justViewed[i] = currentlyShowing[i];
     }
 }
  
 function handleClick(event) {
     console.log('total clicks: ' + counter);
-
+    var storedImages = JSON.parse(localStorage["Images"]);
+    
     if (counter > 24) {
         document.getElementById('container').removeEventListener('click', handleClick);
         showTableResults();
     }
     if (event.target.id === 'container') {
-        return alert('Nope, you need to click on an image.');
+        return alert('Please click on one of the images :)');
     }
 
     counter += 1;
-    for (var i = 0; i < Image.allImages.length; i++) {
-        if (event.target.id === Image.allImages[i].name) {
-            Image.allImages[i].votes += 1;
-            console.log(event.target.id + ' has ' + Image.allImages[i].votes + ' votes in ' + Image.allImages[i].views + ' views');
+    for (var i = 0; i < storedImages.allImages.length; i++) {
+        if (event.target.id === storedImages.allImages[i].name) {
+            storedImages.allImages[i].votes += 1;
+            console.log(event.target.id + ' has ' + storedImages.allImages[i].votes + ' votes in ' + storedImages.allImages[i].views + ' views');
         }
     }
 
+    localStorage["Images"] = JSON.stringify(storedImages);
     showImages();
 }
 
@@ -90,11 +113,14 @@ function showTableResults() {
     var allNames = [];
     var allVotes = [];
     var labelColors = [];
+
+    var storedImages = JSON.parse(localStorage["Images"]);
     
+
     // create all the data we need for the chart
-    for (var i = 0; i < Image.allImages.length; i++) {
-        allNames.push(Image.allImages[i].name);
-        allVotes.push(Image.allImages[i].votes);
+    for (var i = 0; i < storedImages.length; i++) {
+        allNames.push(storeImagesd[i].name);
+        allVotes.push(storeImagesd[i].votes);
         labelColors.push(getRandomColor());
     }
 
