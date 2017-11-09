@@ -33,14 +33,16 @@ function createImageObjects() {
 createImageObjects();
 
 // Init the local storage variables (if empty)
-if (storedImgArr === 'undefined') {
+if (storedImgArr === null) {
     console.log('stored image array is empty');
-    localStorage.setItem('Images', JSON.stringify(Image.allImages));    
+    localStorage.setItem('Images', JSON.stringify(Image.allImages));
+    storedImgArr = JSON.parse(localStorage.getItem('Images'));    
 }
-if (storedCounter === 'undefined') {
+if (storedCounter === null) {
     console.log('stored counter is empty');
     storedCounter = 0;
-    localStorage.setItem('Counter', JSON.stringify(storedCounter));  
+    localStorage.setItem('Counter', JSON.stringify(storedCounter)); 
+    storedCounter = JSON.parse(localStorage.getItem('Counter'));    
 }
 
 
