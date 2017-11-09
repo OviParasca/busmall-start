@@ -1,17 +1,19 @@
 'use strict';
 
 var imgArr = [['R2-D2 Bag', 'img/bag.jpg'], ['Banana Cutter', 'img/banana.jpg'], ['Bathroom iPad Stand', 'img/bathroom.jpg'], ['Yellow Boots', 'img/boots.jpg'], ['Multi-function Toaster', 'img/breakfast.jpg'], ['Meatball Bubble Gum', 'img/bubblegum.jpg'], ['Red Chair', 'img/chair.jpg'], ['Cthulhu Toy', 'img/cthulhu.jpg'], ['Doggie Duck Bill', 'img/dog-duck.jpg'], ['Can Of Dragon Meat', 'img/dragon.jpg'], ['Utencil Pen', 'img/pen.jpg'], ['Pet Sweep', 'img/pet-sweep.jpg'], ['Pizza Scissors', 'img/scissors.jpg'], ['Shark Sleeping Bag', 'img/shark.jpg'], ['Baby Sweep Oneside', 'img/sweep.png'], ['Tauntaun Sleeping Bag', 'img/tauntaun.jpg'], ['Can Of Unicorn Meat', 'img/unicorn.jpg'], ['Tentacle USB', 'img/usb.gif'], ['Water Can', 'img/water-can.jpg'], ['Unique Wine Glass', 'img/wine-glass.jpg']];
-var counter = 0;
 var imgEl = document.getElementById('left-pic');
 var imgEl2 = document.getElementById('center-pic');
 var imgEl3 = document.getElementById('right-pic');
 var ctx = document.getElementById('chart').getContext('2d');
 
+// Local Storage variables
+var storedImgArr = JSON.parse(localStorage.getItem('Images'));
+var storedCounter = JSON.parse(localStorage.getItem('Counter'));
+
 // array to store the objects
 Image.allImages = [];
 Image.justViewed = [];
 Image.pics = [imgEl, imgEl2, imgEl3];
-Image.results = document.getElementById('results');
 
 // make an object
 function Image(name, filepath) {
@@ -30,82 +32,86 @@ function createImageObjects() {
 }
 createImageObjects();
 
-
-// var testObject = {name:"test", time:"Date 2017-02-03T08:38:04.449Z"};
-// localStorage.setItem('testObject', JSON.stringify(testObject));
-// var retrievedObject = localStorage.getItem('testObject');
-// console.log('retrievedObject: ', JSON.parse(retrievedObject));
-
-console.log(Image.allImages);
-// localStorage.removeItem('Images');
-localStorage.setItem('Images', JSON.stringify(Image));
-// localStorage["Images"] = JSON.stringify(Image);
-// var storeImageObjs = JSON.parse(localStorage.getItem('Images'));
-var retrievedObject = localStorage.getItem('Images');
-console.log('testing ' + JSON.parse(retrievedObject));
-
+// Init the local storage variables (if empty)
+if (storedImgArr === 'undefined') {
+    console.log('stored image array is empty');
+    localStorage.setItem('Images', JSON.stringify(Image.allImages));    
+}
+if (storedCounter === 'undefined') {
+    console.log('stored counter is empty');
+    storedCounter = 0;
+    localStorage.setItem('Counter', JSON.stringify(storedCounter));  
+}
 
 
 // add all the event listeners
 var container = document.getElementById('container');
 container.addEventListener('click', handleClick);
   
-// showImages();
+showImages();
 
 
 function showImages() {
     var currentlyShowing = [];
-    var storedImages = JSON.parse(localStorage["Images"]);
-    
-    // make left image unique
+
     currentlyShowing[0] = getRandomIndex();
-    while (storedImages.justViewed.indexOf(currentlyShowing[0]) !== -1) {
+    while (Image.justViewed.indexOf(currentlyShowing[0]) !== -1) {
         currentlyShowing[0] = getRandomIndex();
     }
 
     currentlyShowing[1] = getRandomIndex();
     while (currentlyShowing[0] === currentlyShowing[1] 
-        || storedImages.justViewed.indexOf(currentlyShowing[1]) !== -1) {
+        || Image.justViewed.indexOf(currentlyShowing[1]) !== -1) {
         currentlyShowing[1] = getRandomIndex();
     }
 
     currentlyShowing[2] = getRandomIndex();
     while (currentlyShowing[0] === currentlyShowing[2] 
         || currentlyShowing[1] === currentlyShowing[2] 
-        || storedImages.justViewed.indexOf(currentlyShowing[2]) !== -1) {
+        || Image.justViewed.indexOf(currentlyShowing[2]) !== -1) {
         currentlyShowing[2] = getRandomIndex();
     }
 
-    for (var i = 0; i < storedImages.pics.length; i++) {
-        storedImages.pics[i].src = storedImages.allImages[currentlyShowing[i]].filepath;
-        storedImages.pics[i].id = storedImages.allImages[currentlyShowing[i]].name;
-        storedImages.allImages[currentlyShowing[i]].views += 1;
-        storedImages.justViewed[i] = currentlyShowing[i];
-    }
+    for (var i = 0; i < Image.pics.length; i++) {
+        Image.pics[i].src = storedImgArr[currentlyShowing[i]].filepath;
+        Image.pics[i].id = storedImgArr[currentlyShowing[i]].name;
+        storedImgArr[currentlyShowing[i]].views += 1;
+        Image.justViewed[i] = currentlyShowing[i];
+    }   
 }
  
 function handleClick(event) {
-    console.log('total clicks: ' + counter);
-    var storedImages = JSON.parse(localStorage["Images"]);
-    
-    if (counter > 24) {
+    console.log('total clicks: ' + storedCounter);
+
+    if (storedCounter > 24) {
+        storedCounter = 0;
         document.getElementById('container').removeEventListener('click', handleClick);
         showTableResults();
-    }
-    if (event.target.id === 'container') {
-        return alert('Please click on one of the images :)');
-    }
 
-    counter += 1;
-    for (var i = 0; i < storedImages.allImages.length; i++) {
-        if (event.target.id === storedImages.allImages[i].name) {
-            storedImages.allImages[i].votes += 1;
-            console.log(event.target.id + ' has ' + storedImages.allImages[i].votes + ' votes in ' + storedImages.allImages[i].views + ' views');
+        // reset the local storage
+        localStorage.setItem('Counter', JSON.stringify(storedCounter));        
+        for (var i = 0; i < storedImgArr.length; i++) {
+            storedImgArr[i].votes = 0;
         }
-    }
+        localStorage.setItem('Images', JSON.stringify(storedImgArr));         
+    } else {
+        if (event.target.id === 'container') {
+            return alert('Nope, you need to click on an image.');
+        }
 
-    localStorage["Images"] = JSON.stringify(storedImages);
-    showImages();
+        storedCounter += 1;
+        localStorage.setItem('Counter', JSON.stringify(storedCounter));    
+        for (var i = 0; i < storedImgArr.length; i++) {
+            if (event.target.id === storedImgArr[i].name) {
+                storedImgArr[i].votes += 1;
+                // update the local storage
+                localStorage.setItem('Images', JSON.stringify(storedImgArr)); 
+                console.log(event.target.id + ' has ' + storedImgArr[i].votes + ' votes in ' + storedImgArr[i].views + ' views');
+            }
+        }
+
+        showImages();
+    }
 }
 
 // show the final results in a table
@@ -114,13 +120,10 @@ function showTableResults() {
     var allVotes = [];
     var labelColors = [];
 
-    var storedImages = JSON.parse(localStorage["Images"]);
-    
-
     // create all the data we need for the chart
-    for (var i = 0; i < storedImages.length; i++) {
-        allNames.push(storeImagesd[i].name);
-        allVotes.push(storeImagesd[i].votes);
+    for (var i = 0; i < storedImgArr.length; i++) {
+        allNames.push(storedImgArr[i].name);
+        allVotes.push(storedImgArr[i].votes);
         labelColors.push(getRandomColor());
     }
 
@@ -147,7 +150,7 @@ function showTableResults() {
 }
 
 
-// Helper functions
+/// Helper functions
 
 // this function returns a random number from 0 to the max number of images
 function getRandomIndex() {
@@ -159,7 +162,7 @@ function round(value, decimals) {
     return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
 }
 
-// this function creates a random color
+// this function creates and returns a random color
 function getRandomColor() {
     var letters = '0123456789ABCDEF';
     var color = '#';

@@ -7,10 +7,6 @@ body {
 }
 
 h1 {
-    width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-
     height: 100px;
     display: flex;
     flex-direction: column;
